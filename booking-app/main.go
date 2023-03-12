@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"sync"
 	"time"
 )
 
@@ -17,12 +18,14 @@ type User struct {
 	tickets uint
 }
 
+var waitGroup = sync.WaitGroup{}
+
 func main() {
 
 	greetUsers()
 
 	// Infinite Loop
-	for {
+	// for {
 		firstName, lastName, email, userTickets := getUserInputs()
 
 		isValidName, isValidEmail, isValidTicketNumber := validateUserInput(firstName, lastName, email, userTickets, remainingTickets)
@@ -30,6 +33,7 @@ func main() {
 		if isValidName && isValidEmail && isValidTicketNumber {
 
 			bookTicket(userTickets, firstName, lastName, email)
+			waitGroup.Add(1)
 			go sendTicket(userTickets, firstName, lastName, email)
 
 			firstNames := getFirstNames()
@@ -37,7 +41,7 @@ func main() {
 
 			if remainingTickets == 0 {
 				fmt.Println("Our conference is booked out. Come back next year.")
-				break
+				// break
 			}
 
 		} else {
@@ -51,7 +55,9 @@ func main() {
 				fmt.Println("Number of tickets you entered is invalid")
 			}
 		}
-	}
+	// }
+
+	waitGroup.Wait()
 }
 
 func greetUsers() {
@@ -116,4 +122,5 @@ func sendTicket(userTickets uint, firstName string, lastName string, email strin
 	fmt.Println("##########################################")
 	fmt.Println("Done!")
 	fmt.Println("")
+	waitGroup.Done()
 }
