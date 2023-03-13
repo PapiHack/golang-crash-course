@@ -26,15 +26,15 @@ func main() {
 
 	// Infinite Loop
 	// for {
-		firstName, lastName, email, userTickets := getUserInputs()
+		userData := getUserInputs()
 
-		isValidName, isValidEmail, isValidTicketNumber := validateUserInput(firstName, lastName, email, userTickets, remainingTickets)
+		isValidName, isValidEmail, isValidTicketNumber := validateUserInput(userData, remainingTickets)
 
 		if isValidName && isValidEmail && isValidTicketNumber {
 
-			bookTicket(userTickets, firstName, lastName, email)
+			bookTicket(userData)
 			waitGroup.Add(1)
-			go sendTicket(userTickets, firstName, lastName, email)
+			go sendTicket(userData)
 
 			firstNames := getFirstNames()
 			fmt.Printf("The first names of bookings are: %v\n", firstNames)
@@ -76,48 +76,41 @@ func getFirstNames() []string {
 	return firstNames
 }
 
-func getUserInputs() (string, string, string, uint) {
-	var firstName string
-	var lastName string
-	var email string
-	var userTickets uint
+func getUserInputs() User {
+	var user User
 
 	fmt.Println("Enter your first name: ")
-	fmt.Scan(&firstName)
+	fmt.Scan(&user.firstName)
 
 	fmt.Println("Enter your last name: ")
-	fmt.Scan(&lastName)
+	fmt.Scan(&user.lastName)
 
 	fmt.Println("Enter your email address: ")
-	fmt.Scan(&email)
+	fmt.Scan(&user.email)
 
 	fmt.Println("Enter number of tickets: ")
-	fmt.Scan(&userTickets)
+	fmt.Scan(&user.tickets)
 
-	return firstName, lastName, email, userTickets
+	return user
 }
 
-func bookTicket(userTickets uint, firstName string, lastName string, email string) {
-	remainingTickets -= userTickets 
-
-	var userData = User{
-		firstName: firstName,
-		lastName: lastName,
-		email: email,
-		tickets: userTickets,
-	}
+func bookTicket(userData User) {
+	remainingTickets -= userData.tickets
 
 	bookings = append(bookings, userData)
 	fmt.Printf("List of bookings is %v.\n", bookings)
 
-	fmt.Printf("Thank you %v %v for booking %v tickets. You will receive a confirmation email at %v.\n", firstName, lastName, userTickets, email)
+	fmt.Printf(
+		"Thank you %v %v for booking %v tickets. You will receive a confirmation email at %v.\n",
+		userData.firstName, userData.lastName, userData.tickets, userData.email,
+	)
 	fmt.Printf("%v tickets remaining for \"%v\"\n", remainingTickets, conferenceName)
 }
 
-func sendTicket(userTickets uint, firstName string, lastName string, email string)  {
-	ticket := fmt.Sprintf("%v tickets for %v %v", userTickets, firstName, lastName)
+func sendTicket(user User)  {
+	ticket := fmt.Sprintf("%v tickets for %v %v", user.tickets, user.firstName, user.lastName)
 	fmt.Println("##########################################")
-	fmt.Printf("Sending  %v tickets to %v...\n", ticket, firstName + " " + lastName)
+	fmt.Printf("Sending  %v tickets to %v...\n", ticket, user.firstName + " " + user.lastName)
 	time.Sleep(30 * time.Second)
 	fmt.Println("##########################################")
 	fmt.Println("Done!")
